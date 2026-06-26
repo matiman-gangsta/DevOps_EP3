@@ -126,10 +126,10 @@ jobs:
     # 12. Despliegue Simulado y Verificación (Health Check)
     - name: Despliegue Simulado y Verificación de Salud
       run: |
-        docker-compose up -d ep2-api
+        docker compose up -d ep2-api
         echo "Esperando 10 segundos a que el contenedor se inicialice..."
         sleep 10
         # Verificar estado del servicio local mediante curl
-        curl -f http://localhost:8080/health || (docker-compose logs ep2-api && exit 1)
+        curl -f http://localhost:8080/health || (docker compose logs ep2-api && exit 1)
         echo "Despliegue simulado exitoso!"
-        docker-compose down
+        docker compose down
