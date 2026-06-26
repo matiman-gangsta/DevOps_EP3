@@ -100,6 +100,11 @@ jobs:
         echo "Metadata generada con éxito:"
         cat metadata.json
 
+    # 9.5. Convertir nombre de repositorio a minúsculas para Docker
+    - name: Convertir nombre de repositorio a minúsculas
+      run: |
+        echo "REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
     # 10. Iniciar sesión en GitHub Container Registry (GHCR)
     - name: Iniciar sesión en GHCR
       uses: docker/login-action@v3
@@ -115,8 +120,8 @@ jobs:
         context: .
         push: true
         tags: |
-          ghcr.io/${{ github.repository }}/ep2-microservice:${{ github.sha }}
-          ghcr.io/${{ github.repository }}/ep2-microservice:latest
+          ghcr.io/${{ env.REPO_LOWER }}/ep2-microservice:${{ github.sha }}
+          ghcr.io/${{ env.REPO_LOWER }}/ep2-microservice:latest
 
     # 12. Despliegue Simulado y Verificación (Health Check)
     - name: Despliegue Simulado y Verificación de Salud
