@@ -27,7 +27,7 @@ El panel principal muestra:
 
 Para probarlo localmente:
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 * Accede al microservicio: `http://localhost:8080/`
 * Accede a las métricas raw de Prometheus: `http://localhost:8080/metrics`
@@ -105,12 +105,12 @@ A continuación, se detallan las instrucciones paso a paso para levantar este am
 4. **Clonar el Repositorio y Levantar la Aplicación**:
    * Clone este repositorio en la instancia de EC2:
      ```bash
-     git clone https://github.com/matiman-gangsta/DevOps_EP2.git
-     cd DevOps_EP2
+     git clone https://github.com/matiman-gangsta/DevOps_EP3.git
+     cd DevOps_EP3
      ```
    * Inicie el stack completo de servicios en segundo plano:
      ```bash
-     docker-compose up -d --build
+     docker compose up -d --build
      ```
    * Verifique que los contenedores estén arriba y en estado saludable:
      ```bash

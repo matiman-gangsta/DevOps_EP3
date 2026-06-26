@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   # Nombre del servicio del microservicio
-  ep2-api:
+  ep3-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: EP2_container
+    container_name: EP3_container
     # Mapeo de puertos: Puerto_Host:Puerto_Contenedor
     ports:
       - "8080:8080"
