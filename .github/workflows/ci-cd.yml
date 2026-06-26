@@ -1,0 +1,130 @@
+name: DevOps EP2
+
+on:
+  push:
+    branches: [ "develop", "main" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  # 1. Job de Seguridad Estática (SAST) con CodeQL
+  analyze:
+    name: Analizar Código (SAST - CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    - name: Inicializar CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+
+    - name: Ejecutar Análisis CodeQL
+      uses: github/codeql-action/analyze@v3
+
+  # 2. Job de Construcción, Pruebas y Despliegue Simulado (CI/CD)
+  build-and-test:
+    name: Validar Microservicio y Contenedor
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Descargar el código del repositorio
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    # 2. Configurar el entorno de Node.js
+    - name: Instalación de Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    # 3. Registrar el tiempo de inicio del build
+    - name: Iniciar control de tiempo de despliegue
+      run: |
+        echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
+    # 4. Instalar las dependencias del proyecto
+    - name: Instalación de dependencias
+      run: npm install
+
+    # 5. Ejecutar pruebas unitarias automatizadas (genera cobertura)
+    - name: Ejecución de Pruebas Unitarias
+      run: npm test
+
+    # 6. Publicar reporte de cobertura en Job Summary de GitHub Actions
+    - name: Publicar Resumen de Cobertura en CI
+      run: |
+        echo "### Resumen de Cobertura de Pruebas (Jest)" >> $GITHUB_STEP_SUMMARY
+        node -e "
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('coverage/coverage-summary.json'));
+          console.log('| Métrica | Cobertura % |');
+          console.log('| --- | --- |');
+          console.log('| Líneas | ' + data.total.lines.pct + '% |');
+          console.log('| Sentencias | ' + data.total.statements.pct + '% |');
+          console.log('| Funciones | ' + data.total.functions.pct + '% |');
+          console.log('| Ramas | ' + data.total.branches.pct + '% |');
+        " >> $GITHUB_STEP_SUMMARY
+
+    # 7. Auditoría de Cumplimiento (Quality Gate)
+    - name: Auditoría de Cumplimiento (Compliance Quality Gate)
+      run: node scripts/compliance-check.js
+
+    # 8. Análisis de vulnerabilidades en dependencias y código con Snyk
+    - name: Escaneo de Seguridad (DevSecOps)
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high # Esto bloqueará el pipeline si encuentra fallos de seguridad graves o críticos
+        
+    # 9. Calcular duración y generar metadata.json para instrumentación
+    - name: Generar Metadata de Despliegue y Calidad
+      run: |
+        END_TIME=$(date +%s)
+        DURATION=$((END_TIME - START_TIME))
+        COVERAGE=$(node -e "const fs = require('fs'); const data = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8')); console.log(data.total.lines.pct);")
+        echo "{\"test_coverage_percent\": $COVERAGE, \"deployment_duration_seconds\": $DURATION}" > metadata.json
+        echo "Metadata generada con éxito:"
+        cat metadata.json
+
+    # 10. Iniciar sesión en GitHub Container Registry (GHCR)
+    - name: Iniciar sesión en GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # 11. Construir y publicar la imagen en GHCR (incluyendo metadata.json)
+    - name: Construir y Publicar Imagen en GHCR
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ghcr.io/${{ github.repository }}/ep2-microservice:${{ github.sha }}
+          ghcr.io/${{ github.repository }}/ep2-microservice:latest
+
+    # 12. Despliegue Simulado y Verificación (Health Check)
+    - name: Despliegue Simulado y Verificación de Salud
+      run: |
+        docker-compose up -d ep2-api
+        echo "Esperando 10 segundos a que el contenedor se inicialice..."
+        sleep 10
+        # Verificar estado del servicio local mediante curl
+        curl -f http://localhost:8080/health || (docker-compose logs ep2-api && exit 1)
+        echo "Despliegue simulado exitoso!"
+        docker-compose down
