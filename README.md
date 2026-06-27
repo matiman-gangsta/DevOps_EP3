@@ -45,7 +45,7 @@ A continuación se adjuntan las capturas de pantalla que evidencian el correcto 
 
 #### 1. Panel de Control (Dashboard) de Monitoreo en Grafana
 Se observa el estado **UP**, la cobertura de código cargada y los gráficos de consumo de CPU/Memoria activos:
-![Dashboard Grafana](./img/Screenshot%202026-06-23%20160900.png)
+![Dashboard Grafana](./img/Screenshot%202026-06-27%20at%2009-31-10%20DevOps%20Microservice%20Monitoring%20-%20Dashboards%20-%20Grafana.png)
 
 #### 2. Visualización de Métricas de la Aplicación en Prometheus
 Métricas raw expuestas en el endpoint `/metrics`:
