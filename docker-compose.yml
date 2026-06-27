@@ -20,6 +20,14 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     networks:
       - devops-network
     restart: always
@@ -28,6 +36,14 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus_container
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -40,6 +56,14 @@ services:
   grafana:
     image: grafana/grafana-oss:latest
     container_name: grafana_container
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
     ports:
       - "3000:3000"
     environment:
