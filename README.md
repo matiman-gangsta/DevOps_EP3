@@ -158,9 +158,3 @@ Si intentamos introducir un cambio que reduzca la cobertura de pruebas (por ejem
 * **Grafana URL**: `http://localhost:3000` (o `http://<IP_PUBLICA_AWS>:3000` si está en la nube).
 * **Usuario**: `admin`
 * **Contraseña**: `admin`
-
-### Accesos Externos Compartidos
-Para la validación del docente, se ha concedido acceso a las siguientes plataformas externas al usuario del profesor (**Nico Singh / nicosingh / nico@singh.cl**):
-* **SonarCloud**: Acceso concedido al usuario personal `nico@singh.cl` (o proyecto configurado como público).
-* **Snyk**: Acceso compartido a `nico@singh.cl`.
-* **GitHub**: Acceso de colaborador al usuario `nicosingh` para revisión del código y ejecución de los workflows en el repositorio.
