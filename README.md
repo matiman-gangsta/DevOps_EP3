@@ -29,9 +29,9 @@ Para probarlo localmente:
 ```bash
 docker compose up -d --build
 ```
-* Accede al microservicio: `http://localhost:8080/`
-* Accede a las métricas raw de Prometheus: `http://localhost:8080/metrics`
-* Accede al Dashboard de Grafana: `http://localhost:3000` (Usuario: `admin`, Clave: `admin`)
+* Acceder al microservicio: `http://localhost:8080/`
+* Acceder a las métricas raw de Prometheus: `http://localhost:8080/metrics`
+* Acceder al Dashboard de Grafana: `http://localhost:3000` (Usuario: `admin`, Clave: `admin`)
 
 ---
 
@@ -45,7 +45,7 @@ A continuación se adjuntan las capturas de pantalla que evidencian el correcto 
 
 #### 1. Panel de Control (Dashboard) de Monitoreo en Grafana
 Se observa el estado **UP**, la cobertura de código cargada y los gráficos de consumo de CPU/Memoria activos:
-![Dashboard Grafana](./img/Screenshot%202026-06-23%20160900.png)
+![Dashboard Grafana](./img/Screenshot%202026-06-27%20at%2009-31-10%20DevOps%20Microservice%20Monitoring%20-%20Dashboards%20-%20Grafana.png)
 
 #### 2. Visualización de Métricas de la Aplicación en Prometheus
 Métricas raw expuestas en el endpoint `/metrics`:
@@ -75,22 +75,22 @@ Visualización de `docker ps` mostrando el contenedor de la API con estado **`(h
 A continuación, se detallan las instrucciones paso a paso para levantar este ambiente en un servidor **AWS EC2**:
 
 1. **Crear una Instancia EC2**:
-   * Lance una instancia EC2 en la consola de AWS (se recomienda usar la AMI oficial de **Ubuntu 24.04 LTS** en un tipo de instancia `t2.micro` o `t3.micro`).
-   * Asocie o cree un par de llaves SSH para poder conectarse al servidor.
+   * Lanzar una instancia EC2 en la consola de AWS (se recomienda usar la AMI oficial de **Ubuntu 24.04 LTS** en un tipo de instancia `t2.micro` o `t3.micro`).
+   * Asociar o crear un par de llaves SSH para permitir la conexión al servidor.
 
 2. **Configurar el Grupo de Seguridad (Security Group)**:
-   * Edite las reglas de entrada del Security Group asociado a la instancia para permitir el tráfico en los siguientes puertos:
-     * **Puerto 22 (TCP)**: Acceso SSH desde su IP.
+   * Configurar las reglas de entrada del Security Group asociado a la instancia para permitir el tráfico en los siguientes puertos:
+     * **Puerto 22 (TCP)**: Acceso SSH.
      * **Puerto 8080 (TCP)**: Puerto de acceso a la API del Microservicio.
      * **Puerto 3000 (TCP)**: Acceso a la interfaz web de Grafana.
      * **Puerto 9090 (TCP)**: Acceso (opcional) a la interfaz web de Prometheus.
 
 3. **Conectarse al Servidor e Instalar Docker / Docker Compose**:
-   * Conéctese vía SSH a su instancia:
+   * Conectarse vía SSH a la instancia:
      ```bash
      ssh -i "su-llave.pem" ubuntu@<IP_PUBLICA_AWS>
      ```
-   * Actualice los paquetes e instale Docker y Docker Compose:
+   * Actualizar los paquetes e instalar Docker y Docker Compose:
      ```bash
      sudo apt-get update
      sudo apt-get install -y docker.io docker-compose
@@ -100,7 +100,7 @@ A continuación, se detallan las instrucciones paso a paso para levantar este am
      # Agregar al usuario ubuntu al grupo docker para correr comandos sin sudo
      sudo usermod -aG docker ubuntu
      ```
-   * Cierre la sesión SSH y vuelva a ingresar para aplicar los permisos de grupo.
+   * Cerrar la sesión SSH y volver a ingresar para aplicar los permisos de grupo.
 
 4. **Clonar el Repositorio y Levantar la Aplicación**:
    * Clone este repositorio en la instancia de EC2:
@@ -118,8 +118,8 @@ A continuación, se detallan las instrucciones paso a paso para levantar este am
      ```
 
 5. **Acceder a los Servicios**:
-   * Ingrese a la API: `http://<IP_PUBLICA_AWS>:8080/`
-   * Ingrese a Grafana: `http://<IP_PUBLICA_AWS>:3000/`
+   * Acceso a la API: `http://<IP_PUBLICA_AWS>:8080/`
+   * Acceso a Grafana: `http://<IP_PUBLICA_AWS>:3000/`
 
 ---
 
@@ -128,8 +128,8 @@ A continuación, se detallan las instrucciones paso a paso para levantar este am
 La integridad y seguridad del código en las ramas principales se protegen mediante políticas automatizadas integradas en el flujo de CI/CD:
 
 ### Políticas de Branch Protection (GitHub):
-1. **Pull Requests Requeridos**: Nadie puede hacer push directo a `develop` o `main`. Todo cambio debe provenir de un PR.
-2. **Status Checks Obligatorios**: El pipeline de GitHub Actions debe ejecutarse y terminar con éxito antes de que se habilite el botón de merge.
+1. **Pull Requests Requeridos**: No se permite el push directo a `develop` o `main`. Todo cambio debe provenir de un Pull Request (PR).
+2. **Status Checks Obligatorios**: El pipeline de GitHub Actions debe ejecutarse y finalizar con éxito antes de permitir el merge.
 
 ### Auditoría de Calidad Automática (Quality Gate):
 Se diseñó el script `scripts/compliance-check.js` para actuar como el "Quality Gate" del pipeline. Este script analiza el archivo JSON de resumen de cobertura de pruebas de Jest (`coverage/coverage-summary.json`):
@@ -137,7 +137,7 @@ Se diseñó el script `scripts/compliance-check.js` para actuar como el "Quality
 * Esto provoca que el paso `Auditoría de Cumplimiento` en GitHub Actions falle de inmediato, bloqueando el merge del PR (Estrategia **Fail-Fast**).
 
 ### Demostración de Bloqueo por Fallas de Calidad (Fail-Fast Demo):
-Si intentamos introducir un cambio que reduzca la cobertura de pruebas (por ejemplo, añadiendo funciones sin sus correspondientes tests en `app.js` o configurando un umbral mayor), ocurrirá lo siguiente:
+Si se intenta introducir un cambio que reduzca la cobertura (por ejemplo, al añadir funciones sin sus correspondientes pruebas en `app.js` o al configurar un umbral mayor), se produce el siguiente comportamiento:
 1. Durante la acción `npm test`, se genera el archivo `coverage-summary.json` indicando la reducción de la cobertura.
 2. En la acción `Auditoría de Cumplimiento`, el script detecta que la cobertura no cumple el umbral mínimo del 80%:
    ```text
@@ -158,9 +158,3 @@ Si intentamos introducir un cambio que reduzca la cobertura de pruebas (por ejem
 * **Grafana URL**: `http://localhost:3000` (o `http://<IP_PUBLICA_AWS>:3000` si está en la nube).
 * **Usuario**: `admin`
 * **Contraseña**: `admin`
-
-### Accesos Externos Compartidos
-Para la validación del docente, se ha concedido acceso a las siguientes plataformas externas al usuario del profesor (**Nico Singh / nicosingh / nico@singh.cl**):
-* **SonarCloud**: Acceso concedido al usuario personal `nico@singh.cl` (o proyecto configurado como público).
-* **Snyk**: Acceso compartido a `nico@singh.cl`.
-* **GitHub**: Acceso de colaborador al usuario `nicosingh` para revisión del código y ejecución de los workflows en el repositorio.
